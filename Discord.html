@@ -1,96 +1,64 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bot Discord - Gestionnaire</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: white;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        .box {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            background-color: #444;
-            border: none;
-            border-radius: 10px;
-            color: white;
-        }
-        .button {
-            background-color: #4CAF50;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .button:hover {
-            background-color: #45a049;
-        }
-        .status {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-    </style>
-</head>
-<body>
+const express = require('express');
+const { Client, GatewayIntentBits } = require('discord.js');
+const bodyParser = require('body-parser');
 
-<div class="container">
-    <div class="box">
-        <h1>Gestionnaire de Bot Discord</h1>
-        <input type="text" id="token" class="input-field" placeholder="Entrez votre Token">
-        <button class="button" onclick="connectBot()">Connecter le Bot</button>
-        <div id="status" class="status"></div>
-    </div>
-</div>
+const app = express();
+const port = 3000;
 
-<script>
-    function connectBot() {
-        const token = document.getElementById('token').value;
+let botClient = null;
+let botToken = '';
+let commands = [];
 
-        if (token === '') {
-            document.getElementById('status').textContent = 'Veuillez entrer un token valide.';
-            document.getElementById('status').style.color = 'red';
-            return;
-        }
+app.use(bodyParser.json());
+app.use(express.static('public'));
 
-        // Simulation de la connexion au bot
-        document.getElementById('status').textContent = 'Connexion en cours...';
-        document.getElementById('status').style.color = 'orange';
+// Endpoint pour connecter le bot
+app.post('/connect', (req, res) => {
+    botToken = req.body.token;
 
-        setTimeout(function() {
-            document.getElementById('status').textContent = 'Bot connecté avec succès !';
-            document.getElementById('status').style.color = 'green';
-        }, 2000); // Simule la connexion en 2 secondes
+    if (!botToken) {
+        return res.json({ success: false });
     }
-</script>
 
-</body>
-</html>
+    botClient = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+
+    botClient.login(botToken)
+        .then(() => {
+            res.json({ success: true });
+        })
+        .catch(() => {
+            res.json({ success: false });
+        });
+
+    botClient.on('ready', () => {
+        console.log('Bot connecté !');
+    });
+
+    // Maintenir le bot actif 24/7
+    botClient.on('messageCreate', message => {
+        if (message.content.startsWith('!')) {
+            const command = message.content.slice(1).toLowerCase();
+            if (commands.includes(command)) {
+                message.channel.send(`Commande exécutée: ${command}`);
+            }
+        }
+    });
+});
+
+// Endpoint pour ajouter des commandes dynamiques
+app.post('/add-command', (req, res) => {
+    const { command } = req.body;
+
+    if (!command || commands.includes(command)) {
+        return res.json({ success: false });
+    }
+
+    commands.push(command);
+    res.json({ success: true });
+
+    console.log(`Commande ajoutée: ${command}`);
+});
+
+app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+});
