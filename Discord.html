@@ -1,64 +1,146 @@
-const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
-const bodyParser = require('body-parser');
-
-const app = express();
-const port = 3000;
-
-let botClient = null;
-let botToken = '';
-let commands = [];
-
-app.use(bodyParser.json());
-app.use(express.static('public'));
-
-// Endpoint pour connecter le bot
-app.post('/connect', (req, res) => {
-    botToken = req.body.token;
-
-    if (!botToken) {
-        return res.json({ success: false });
-    }
-
-    botClient = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
-
-    botClient.login(botToken)
-        .then(() => {
-            res.json({ success: true });
-        })
-        .catch(() => {
-            res.json({ success: false });
-        });
-
-    botClient.on('ready', () => {
-        console.log('Bot connecté !');
-    });
-
-    // Maintenir le bot actif 24/7
-    botClient.on('messageCreate', message => {
-        if (message.content.startsWith('!')) {
-            const command = message.content.slice(1).toLowerCase();
-            if (commands.includes(command)) {
-                message.channel.send(`Commande exécutée: ${command}`);
-            }
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Bot Discord</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            margin: 0;
+            padding: 0;
         }
-    });
-});
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .box {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #444;
+            border: none;
+            border-radius: 10px;
+            color: white;
+        }
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .command-list {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
 
-// Endpoint pour ajouter des commandes dynamiques
-app.post('/add-command', (req, res) => {
-    const { command } = req.body;
+<div class="container">
+    <div class="box">
+        <h1>Gestionnaire de Bot Discord</h1>
+        <input type="text" id="token" class="input-field" placeholder="Entrez votre Token">
+        <button class="button" onclick="connectBot()">Connecter le Bot</button>
+        <div id="status" class="status"></div>
 
-    if (!command || commands.includes(command)) {
-        return res.json({ success: false });
+        <h3>Ajouter une commande :</h3>
+        <input type="text" id="command" class="input-field" placeholder="Nom de la commande">
+        <button class="button" onclick="addCommand()">Ajouter la commande</button>
+        <div id="commandStatus" class="status"></div>
+
+        <div class="command-list" id="commandList">
+            <h3>Commandes Actuelles :</h3>
+        </div>
+    </div>
+</div>
+
+<script>
+    let commands = [];
+
+    // Fonction pour connecter le bot (ici c'est une simulation)
+    function connectBot() {
+        const token = document.getElementById('token').value;
+
+        if (token === '') {
+            document.getElementById('status').textContent = 'Veuillez entrer un token valide.';
+            document.getElementById('status').style.color = 'red';
+            return;
+        }
+
+        // Simuler une connexion réussie
+        document.getElementById('status').textContent = 'Bot connecté avec succès !';
+        document.getElementById('status').style.color = 'green';
     }
 
-    commands.push(command);
-    res.json({ success: true });
+    // Fonction pour ajouter une commande à la liste (simulation)
+    function addCommand() {
+        const command = document.getElementById('command').value;
 
-    console.log(`Commande ajoutée: ${command}`);
-});
+        if (command === '') {
+            document.getElementById('commandStatus').textContent = 'Veuillez entrer une commande.';
+            document.getElementById('commandStatus').style.color = 'red';
+            return;
+        }
 
-app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-});
+        if (commands.includes(command)) {
+            document.getElementById('commandStatus').textContent = 'Cette commande existe déjà.';
+            document.getElementById('commandStatus').style.color = 'red';
+            return;
+        }
+
+        // Ajouter la commande à la liste et à l'affichage
+        commands.push(command);
+        updateCommandList();
+
+        document.getElementById('commandStatus').textContent = 'Commande ajoutée avec succès !';
+        document.getElementById('commandStatus').style.color = 'green';
+    }
+
+    // Fonction pour mettre à jour la liste des commandes affichées
+    function updateCommandList() {
+        const commandListElement = document.getElementById('commandList');
+        commandListElement.innerHTML = '<h3>Commandes Actuelles :</h3>'; // Réinitialiser la liste
+
+        commands.forEach(command => {
+            const div = document.createElement('div');
+            div.textContent = `!${command}`;
+            commandListElement.appendChild(div);
+        });
+    }
+</script>
+
+</body>
+</html>
+
