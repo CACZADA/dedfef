@@ -2,125 +2,48 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>GhostBot Like - Gratuit</title>
+  <title>Connexion Bot Discord</title>
   <style>
     body {
-      background-color: #111;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-    h1 {
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
       text-align: center;
-      color: #0f0;
+      padding-top: 100px;
     }
-    input, select, button {
+    input, button {
       padding: 10px;
-      margin: 10px 0;
-      width: 100%;
+      font-size: 16px;
+      border-radius: 8px;
       border: none;
-      border-radius: 10px;
-    }
-    input {
-      background: #222;
-      color: white;
+      margin: 5px;
     }
     button {
-      background: #0f0;
-      color: #000;
+      background: #00cc66;
+      color: white;
       cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0c0;
-    }
-    .commands {
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-      max-height: 400px;
-      overflow-y: scroll;
-    }
-    .command {
-      padding: 5px;
-      border-bottom: 1px solid #333;
-    }
-    .added {
-      color: #0f0;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎮 Connecte ton bot Discord</h1>
-    <input type="password" id="token" placeholder="Entre ton token Discord ici..." />
-    <button onclick="connectBot()">Connexion</button>
-
-    <div id="botArea" style="display:none;">
-      <h2>📜 Liste des commandes disponibles</h2>
-      <button onclick="addAllCommands()">Réinitialiser & Ajouter les commandes</button>
-      <div class="commands" id="commandList"></div>
-    </div>
-  </div>
+  <h1>🔌 Connecte ton bot Discord</h1>
+  <input id="tokenInput" type="text" placeholder="Entre ton token ici">
+  <br>
+  <button onclick="startBot()">Lancer le bot</button>
 
   <script>
-    const commands = [
-      "+help", "+ban", "+kick", "+mute", "+unmute", "+warn", "+clear",
-      "+lock", "+unlock", "+hide", "+unhide", "+addrole", "+delrole", "+tempmute",
-      "+tempban", "+userinfo", "+serverinfo", "+ping", "+invite", "+botinfo",
-      "+stats", "+nuke", "+slowmode", "+emojiadd", "+giveaway", "+end", "+reroll",
-      "+poll", "+announce", "+ticket", "+setup", "+reactionrole", "+welcome",
-      "+goodbye", "+autorole", "+log", "+modlog", "+boostlog", "+voicekick",
-      "+voicemove", "+unbanall", "+massiverole", "+cleanup", "+warns", "+derank",
-      "+backup", "+backup load", "+loading", "+embed", "+renew", "+buttons",
-      "+formulaire", "+temprole", "+untemprole", "+clear sanctions", "+banlist",
-      "+muteall", "+unmuteall", "+lockall", "+unlockall", "+hideall", "+unhideall",
-      "+strikes", "+punish", "+punish add", "+punish del", "+punish setup",
-      "+noderank add", "+noderank del", "+public on", "+public off", "+join settings",
-      "+leave settings", "+ancien", "+piconly add", "+piconly del", "+openmodmail",
-      "+sync", "+create", "+newsticker", "+sanctions", "+del sanction", "+voicestats",
-      "+uptime", "+dashboard", "+maintenance", "+suggest", "+bugreport",
-      "+report", "+feedback", "+donate", "+boost", "+premium", "+setprefix", "+resetprefix",
-      "+prefix", "+status", "+presence", "+modonly", "+antiinvite", "+antilink",
-      "+antilink setup", "+anti-ghostping", "+autodelete", "+autorename", "+autoslow"
-    ];
-
-    function connectBot() {
-      const token = document.getElementById("token").value;
-      if (token.length < 10) {
-        alert("Token invalide.");
-        return;
-      }
-      document.getElementById("botArea").style.display = "block";
-      renderCommands([]);
-    }
-
-    function renderCommands(commandList) {
-      const list = document.getElementById("commandList");
-      list.innerHTML = '';
-      commandList.forEach(cmd => {
-        const div = document.createElement("div");
-        div.className = "command added";
-        div.textContent = `${cmd} ✔️`;
-        list.appendChild(div);
-      });
-    }
-
-    function addAllCommands() {
-      // Simule suppression des anciennes commandes
-      alert("Anciennes commandes supprimées du bot (simulation).");
-
-      // Simule ajout des nouvelles commandes
-      renderCommands(commands);
-
-      alert("Toutes les commandes ont été ajoutées au bot (simulation).");
+    function startBot() {
+      const token = document.getElementById('tokenInput').value;
+      fetch('http://localhost:3000/start', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ token })
+      })
+      .then(res => res.text())
+      .then(data => alert(data))
+      .catch(err => alert("Erreur : " + err));
     }
   </script>
 </body>
 </html>
+
