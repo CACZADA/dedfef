@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Discord Bot Dashboard</title>
+  <title>Bot Dashboard</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -44,83 +44,51 @@
     input[type="button"]:hover {
       background-color: #5f73c1;
     }
-    .command-list {
-      list-style-type: none;
-      padding-left: 0;
-    }
-    .command-list li {
-      background-color: #40444b;
-      margin: 5px;
-      padding: 10px;
-      border-radius: 5px;
+    .status {
+      text-align: center;
+      margin-top: 20px;
+      color: #44bfa3;
     }
   </style>
 </head>
 <body>
-  <h1>Dashboard Bot Discord</h1>
+  <h1>Bot Discord - Démarrage</h1>
   <div class="container">
     <div class="input-group">
       <label for="token">Entrez le token du bot :</label>
       <input type="text" id="token" placeholder="Token du bot Discord">
     </div>
     <div class="input-group">
-      <input type="button" value="Connecter le Bot" onclick="connectBot()">
+      <input type="button" value="Lancer le Bot" onclick="startBot()">
     </div>
-    <h3>Commandes Disponibles :</h3>
-    <ul id="commandList" class="command-list">
-      <!-- Les commandes vont s'afficher ici -->
-    </ul>
+    <div id="status" class="status">
+      <!-- Message de statut du bot -->
+    </div>
   </div>
 
   <script>
-    let botClient;
-
-    function connectBot() {
+    function startBot() {
       const token = document.getElementById('token').value;
+      const statusDiv = document.getElementById('status');
 
       if (!token) {
-        alert('Veuillez entrer un token valide.');
+        alert('Veuillez entrer un token valide');
         return;
       }
 
-      // Se connecter au bot via le token
-      fetch('http://localhost:3000/connect', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ token: token })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert('Bot connecté avec succès!');
-          loadCommands();
-        } else {
-          alert('Erreur de connexion avec le bot.');
-        }
-      })
-      .catch(err => {
-        alert('Erreur lors de la connexion : ' + err);
-      });
-    }
-
-    // Charger les commandes du bot
-    function loadCommands() {
-      fetch('http://localhost:3000/commands')
+      // Faire une requête au serveur pour démarrer le bot avec le token
+      fetch(`/start-bot?token=${token}`)
         .then(response => response.json())
         .then(data => {
-          const commandList = document.getElementById('commandList');
-          commandList.innerHTML = '';  // Reset la liste des commandes
-          
-          data.commands.forEach(command => {
-            const li = document.createElement('li');
-            li.textContent = `+${command}`;
-            commandList.appendChild(li);
-          });
+          if (data.success) {
+            statusDiv.innerHTML = 'Bot connecté avec succès!';
+          } else {
+            statusDiv.innerHTML = `Erreur: ${data.message}`;
+          }
         })
-        .catch(err => {
-          console.error('Erreur lors du chargement des commandes:', err);
+        .catch(error => {
+          statusDiv.innerHTML = 'Erreur de connexion avec le serveur';
+          console.error(error);
         });
     }
   </script>
