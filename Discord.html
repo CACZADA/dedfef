@@ -1,146 +1,126 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionnaire de Bot Discord</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: white;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        .box {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            background-color: #444;
-            border: none;
-            border-radius: 10px;
-            color: white;
-        }
-        .button {
-            background-color: #4CAF50;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .button:hover {
-            background-color: #45a049;
-        }
-        .status {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-        .command-list {
-            margin-top: 20px;
-            text-align: left;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>GhostBot Like - Gratuit</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #0f0;
+    }
+    input, select, button {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+    }
+    input {
+      background: #222;
+      color: white;
+    }
+    button {
+      background: #0f0;
+      color: #000;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0c0;
+    }
+    .commands {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: scroll;
+    }
+    .command {
+      padding: 5px;
+      border-bottom: 1px solid #333;
+    }
+    .added {
+      color: #0f0;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>🎮 Connecte ton bot Discord</h1>
+    <input type="password" id="token" placeholder="Entre ton token Discord ici..." />
+    <button onclick="connectBot()">Connexion</button>
 
-<div class="container">
-    <div class="box">
-        <h1>Gestionnaire de Bot Discord</h1>
-        <input type="text" id="token" class="input-field" placeholder="Entrez votre Token">
-        <button class="button" onclick="connectBot()">Connecter le Bot</button>
-        <div id="status" class="status"></div>
-
-        <h3>Ajouter une commande :</h3>
-        <input type="text" id="command" class="input-field" placeholder="Nom de la commande">
-        <button class="button" onclick="addCommand()">Ajouter la commande</button>
-        <div id="commandStatus" class="status"></div>
-
-        <div class="command-list" id="commandList">
-            <h3>Commandes Actuelles :</h3>
-        </div>
+    <div id="botArea" style="display:none;">
+      <h2>📜 Liste des commandes disponibles</h2>
+      <button onclick="addAllCommands()">Réinitialiser & Ajouter les commandes</button>
+      <div class="commands" id="commandList"></div>
     </div>
-</div>
+  </div>
 
-<script>
-    let commands = [];
+  <script>
+    const commands = [
+      "+help", "+ban", "+kick", "+mute", "+unmute", "+warn", "+clear",
+      "+lock", "+unlock", "+hide", "+unhide", "+addrole", "+delrole", "+tempmute",
+      "+tempban", "+userinfo", "+serverinfo", "+ping", "+invite", "+botinfo",
+      "+stats", "+nuke", "+slowmode", "+emojiadd", "+giveaway", "+end", "+reroll",
+      "+poll", "+announce", "+ticket", "+setup", "+reactionrole", "+welcome",
+      "+goodbye", "+autorole", "+log", "+modlog", "+boostlog", "+voicekick",
+      "+voicemove", "+unbanall", "+massiverole", "+cleanup", "+warns", "+derank",
+      "+backup", "+backup load", "+loading", "+embed", "+renew", "+buttons",
+      "+formulaire", "+temprole", "+untemprole", "+clear sanctions", "+banlist",
+      "+muteall", "+unmuteall", "+lockall", "+unlockall", "+hideall", "+unhideall",
+      "+strikes", "+punish", "+punish add", "+punish del", "+punish setup",
+      "+noderank add", "+noderank del", "+public on", "+public off", "+join settings",
+      "+leave settings", "+ancien", "+piconly add", "+piconly del", "+openmodmail",
+      "+sync", "+create", "+newsticker", "+sanctions", "+del sanction", "+voicestats",
+      "+uptime", "+dashboard", "+maintenance", "+suggest", "+bugreport",
+      "+report", "+feedback", "+donate", "+boost", "+premium", "+setprefix", "+resetprefix",
+      "+prefix", "+status", "+presence", "+modonly", "+antiinvite", "+antilink",
+      "+antilink setup", "+anti-ghostping", "+autodelete", "+autorename", "+autoslow"
+    ];
 
-    // Fonction pour connecter le bot (ici c'est une simulation)
     function connectBot() {
-        const token = document.getElementById('token').value;
-
-        if (token === '') {
-            document.getElementById('status').textContent = 'Veuillez entrer un token valide.';
-            document.getElementById('status').style.color = 'red';
-            return;
-        }
-
-        // Simuler une connexion réussie
-        document.getElementById('status').textContent = 'Bot connecté avec succès !';
-        document.getElementById('status').style.color = 'green';
+      const token = document.getElementById("token").value;
+      if (token.length < 10) {
+        alert("Token invalide.");
+        return;
+      }
+      document.getElementById("botArea").style.display = "block";
+      renderCommands([]);
     }
 
-    // Fonction pour ajouter une commande à la liste (simulation)
-    function addCommand() {
-        const command = document.getElementById('command').value;
-
-        if (command === '') {
-            document.getElementById('commandStatus').textContent = 'Veuillez entrer une commande.';
-            document.getElementById('commandStatus').style.color = 'red';
-            return;
-        }
-
-        if (commands.includes(command)) {
-            document.getElementById('commandStatus').textContent = 'Cette commande existe déjà.';
-            document.getElementById('commandStatus').style.color = 'red';
-            return;
-        }
-
-        // Ajouter la commande à la liste et à l'affichage
-        commands.push(command);
-        updateCommandList();
-
-        document.getElementById('commandStatus').textContent = 'Commande ajoutée avec succès !';
-        document.getElementById('commandStatus').style.color = 'green';
+    function renderCommands(commandList) {
+      const list = document.getElementById("commandList");
+      list.innerHTML = '';
+      commandList.forEach(cmd => {
+        const div = document.createElement("div");
+        div.className = "command added";
+        div.textContent = `${cmd} ✔️`;
+        list.appendChild(div);
+      });
     }
 
-    // Fonction pour mettre à jour la liste des commandes affichées
-    function updateCommandList() {
-        const commandListElement = document.getElementById('commandList');
-        commandListElement.innerHTML = '<h3>Commandes Actuelles :</h3>'; // Réinitialiser la liste
+    function addAllCommands() {
+      // Simule suppression des anciennes commandes
+      alert("Anciennes commandes supprimées du bot (simulation).");
 
-        commands.forEach(command => {
-            const div = document.createElement('div');
-            div.textContent = `!${command}`;
-            commandListElement.appendChild(div);
-        });
+      // Simule ajout des nouvelles commandes
+      renderCommands(commands);
+
+      alert("Toutes les commandes ont été ajoutées au bot (simulation).");
     }
-</script>
-
+  </script>
 </body>
 </html>
-
