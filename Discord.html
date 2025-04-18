@@ -2,48 +2,127 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Connexion Bot Discord</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Bot Dashboard</title>
   <style>
     body {
-      background: #111;
-      color: #fff;
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding-top: 100px;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: none;
-      margin: 5px;
-    }
-    button {
-      background: #00cc66;
+      background-color: #2f3136;
       color: white;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #36393f;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #2f3136;
+      border: 1px solid #444;
+      border-radius: 5px;
+      color: white;
+    }
+    input[type="button"] {
+      background-color: #7289da;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
+      width: 100%;
+    }
+    input[type="button"]:hover {
+      background-color: #5f73c1;
+    }
+    .command-list {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .command-list li {
+      background-color: #40444b;
+      margin: 5px;
+      padding: 10px;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>🔌 Connecte ton bot Discord</h1>
-  <input id="tokenInput" type="text" placeholder="Entre ton token ici">
-  <br>
-  <button onclick="startBot()">Lancer le bot</button>
+  <h1>Dashboard Bot Discord</h1>
+  <div class="container">
+    <div class="input-group">
+      <label for="token">Entrez le token du bot :</label>
+      <input type="text" id="token" placeholder="Token du bot Discord">
+    </div>
+    <div class="input-group">
+      <input type="button" value="Connecter le Bot" onclick="connectBot()">
+    </div>
+    <h3>Commandes Disponibles :</h3>
+    <ul id="commandList" class="command-list">
+      <!-- Les commandes vont s'afficher ici -->
+    </ul>
+  </div>
 
   <script>
-    function startBot() {
-      const token = document.getElementById('tokenInput').value;
-      fetch('http://localhost:3000/start', {
+    let botClient;
+
+    function connectBot() {
+      const token = document.getElementById('token').value;
+
+      if (!token) {
+        alert('Veuillez entrer un token valide.');
+        return;
+      }
+
+      // Se connecter au bot via le token
+      fetch('http://localhost:3000/connect', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ token })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token: token })
       })
-      .then(res => res.text())
-      .then(data => alert(data))
-      .catch(err => alert("Erreur : " + err));
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Bot connecté avec succès!');
+          loadCommands();
+        } else {
+          alert('Erreur de connexion avec le bot.');
+        }
+      })
+      .catch(err => {
+        alert('Erreur lors de la connexion : ' + err);
+      });
+    }
+
+    // Charger les commandes du bot
+    function loadCommands() {
+      fetch('http://localhost:3000/commands')
+        .then(response => response.json())
+        .then(data => {
+          const commandList = document.getElementById('commandList');
+          commandList.innerHTML = '';  // Reset la liste des commandes
+          
+          data.commands.forEach(command => {
+            const li = document.createElement('li');
+            li.textContent = `+${command}`;
+            commandList.appendChild(li);
+          });
+        })
+        .catch(err => {
+          console.error('Erreur lors du chargement des commandes:', err);
+        });
     }
   </script>
 </body>
 </html>
-
